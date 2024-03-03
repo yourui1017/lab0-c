@@ -32,18 +32,6 @@ void q_free(struct list_head *head)
         free(entry);
     }
     free(head);
-
-    // if (!head || list_empty(head)) {
-    //      free(head);
-    //      return;
-    //  }
-    // element_t *entry, *safe;
-
-    // list_for_each_entry_safe (entry, safe, head, list)
-    //     q_release_element(entry);
-    // free(head);
-
-    return;
 }
 
 /* Insert an element at head of queue */
@@ -134,17 +122,17 @@ int q_size(struct list_head *head)
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
-    if (!head)
+    if (!head || list_empty(head))
         return false;
 
-    struct list_head **indir = &head;
+    struct list_head **indir = &head->next;
 
-    for (struct list_head *fast = head; fast != head && fast->next != head;
-         fast = fast->next->next)
+    for (struct list_head *fast = head->next;
+         fast != head && fast->next != head; fast = fast->next->next)
         indir = &(*indir)->next;
-    list_del(*indir);
-    free(*indir);
-    // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    struct list_head *del = *indir;
+    list_del(del);
+    free(del);
     return true;
 }
 
