@@ -132,7 +132,8 @@ bool q_delete_mid(struct list_head *head)
         indir = &(*indir)->next;
     struct list_head *del = *indir;
     list_del(del);
-    free(del);
+    free(list_entry(del, element_t, list)->value);
+    free(list_entry(del, element_t, list));
     return true;
 }
 
