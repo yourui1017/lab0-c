@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -140,14 +141,35 @@ bool q_delete_mid(struct list_head *head)
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return false;
+    bool flag = false;
+    element_t *entry, *safe;
+    struct list_head *del = malloc(sizeof(struct list_head));
+    list_for_each_entry_safe (entry, safe, head, list) {
+        if (entry->value == safe->value) {
+            list_move(&entry->list, del);
+            flag = true;
+        }
+        if (flag) {
+            list_move(&entry->list, del);
+            flag = false;
+        }
+    }
+    q_free(del);
     return true;
 }
 
 /* Swap every two adjacent nodes */
 void q_swap(struct list_head *head)
 {
-    // https://leetcode.com/problems/swap-nodes-in-pairs/
+    if (!head || list_empty(head))
+        return;
+
+    struct list_head **indir = &head->next;
+    for (; *indir != head && (*indir)->next != head;
+         indir = &(*indir)->next->next)
+        list_move(*indir, (*indir)->next);
 }
 
 /* Reverse elements in queue */
@@ -159,8 +181,64 @@ void q_reverseK(struct list_head *head, int k)
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
 }
 
+struct list_head *mergeTwoLists(struct list_head *L1,
+                                struct list_head *L2,
+                                bool descend)
+{
+    struct list_head *head = NULL, **ptr = &head, **node;
+
+    for (node = NULL; L1 && L2; *node = (*node)->next) {
+        if (descend)
+            node = (list_entry(L1, element_t, list)->value >
+                    list_entry(L2, element_t, list)->value)
+                       ? &L1
+                       : &L2;
+        else
+            node = (list_entry(L1, element_t, list)->value <
+                    list_entry(L2, element_t, list)->value)
+                       ? &L1
+                       : &L2;
+
+        *ptr = *node;
+        ptr = &(*ptr)->next;
+    }
+    *ptr = (struct list_head *) ((uintptr_t) L1 | (uintptr_t) L2);
+    return head;
+}
+
+struct list_head *mergesort_list(struct list_head *head, bool descend)
+{
+    if (!head || !head->next)
+        return head;
+    struct list_head *slow = head;
+    for (struct list_head *fast = head->next; fast && fast->next;
+         fast = fast->next->next)
+        slow = slow->next;
+    struct list_head *mid = slow->next;
+    slow->next = NULL;
+
+    struct list_head *left = mergesort_list(head, descend),
+                     *right = mergesort_list(mid, descend);
+    return mergeTwoLists(left, right, descend);
+}
+
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    // mergeSortList(head, descend);
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+    head->prev->next = NULL;
+    head->next = mergesort_list(head->next, descend);
+
+    struct list_head **indir = &head;
+    while ((*indir)->next) {
+        (*indir)->next->prev = *indir;
+        indir = &(*indir)->next;
+    }
+    (*indir)->next = head;
+    head->prev = *indir;
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
