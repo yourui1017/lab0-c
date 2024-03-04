@@ -188,16 +188,12 @@ struct list_head *mergeTwoLists(struct list_head *L1,
     struct list_head *head = NULL, **ptr = &head, **node;
 
     for (node = NULL; L1 && L2; *node = (*node)->next) {
+        element_t *L1_entry = list_entry(L1, element_t, list);
+        element_t *L2_entry = list_entry(L2, element_t, list);
         if (descend)
-            node = (list_entry(L1, element_t, list)->value >
-                    list_entry(L2, element_t, list)->value)
-                       ? &L1
-                       : &L2;
+            node = (strcmp(L1_entry->value, L2_entry->value) > 0) ? &L1 : &L2;
         else
-            node = (list_entry(L1, element_t, list)->value <
-                    list_entry(L2, element_t, list)->value)
-                       ? &L1
-                       : &L2;
+            node = (strcmp(L1_entry->value, L2_entry->value) < 0) ? &L1 : &L2;
 
         *ptr = *node;
         ptr = &(*ptr)->next;
