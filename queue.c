@@ -141,22 +141,21 @@ bool q_delete_mid(struct list_head *head)
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
-    if (!head || list_empty(head))
+    if (!head || list_empty(head) || list_is_singular(head))
         return false;
+
     bool flag = false;
-    element_t *entry, *safe;
-    struct list_head *del = malloc(sizeof(struct list_head));
-    list_for_each_entry_safe (entry, safe, head, list) {
-        if (entry->value == safe->value) {
-            list_move(&entry->list, del);
-            flag = true;
+    element_t *node, *safe;
+
+    list_for_each_entry_safe (node, safe, head, list) {
+        bool same = (&safe->list != head && !strcmp(node->value, safe->value));
+        if (same || flag) {
+            list_del(&node->list);
+            q_release_element(node);
         }
-        if (flag) {
-            list_move(&entry->list, del);
-            flag = false;
-        }
+        flag = same;
     }
-    q_free(del);
+
     return true;
 }
 
@@ -173,12 +172,49 @@ void q_swap(struct list_head *head)
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    struct list_head *ptr = head, *tail = head;
+    for (; head->next != tail; head = head->prev) {
+        ptr = ptr->next;
+        head->next = head->prev;
+        head->prev = ptr;
+    }
+    ptr = ptr->next;
+    head->next = head->prev;
+    head->prev = ptr;
+}
 
 /* Reverse the nodes of the list k at a time */
 void q_reverseK(struct list_head *head, int k)
 {
-    // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    bool flag = false;
+    struct list_head **ptr = &head;
+    struct list_head **tmp = &head;
+    while (true) {
+        for (int i = 0; i < k; i++) {
+            ptr = &(*ptr)->next;
+            if (*ptr == head) {
+                flag = true;
+                break;
+            }
+        }
+        if (flag)
+            break;
+
+        ptr = tmp;
+        for (int j = 0; j < k; j++) {
+            list_move((*ptr)->next, (*tmp));
+            ptr = &(*ptr)->next;
+        }
+        tmp = ptr;
+    }
 }
 
 struct list_head *mergeTwoLists(struct list_head *L1,
