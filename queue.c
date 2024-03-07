@@ -41,11 +41,11 @@ bool q_insert_head(struct list_head *head, char *s)
     if (!head)
         return false;
 
-    element_t *new = malloc(sizeof(element_t));
+    element_t *new = (element_t *) malloc(sizeof(element_t));
     if (!new)
         return false;
     int str_size = sizeof(char) * (strlen(s) + 1);
-    new->value = malloc(str_size);
+    new->value = (char *) malloc(str_size);
     if (!new->value) {
         free(new);
         return false;
@@ -195,12 +195,12 @@ void q_reverseK(struct list_head *head, int k)
         return;
 
     bool flag = false;
-    struct list_head **ptr = &head;
-    struct list_head **tmp = &head;
+    struct list_head *ptr = head;
+    struct list_head *tmp = head;
     while (true) {
         for (int i = 0; i < k; i++) {
-            ptr = &(*ptr)->next;
-            if (*ptr == head) {
+            ptr = ptr->next;
+            if (ptr == head) {
                 flag = true;
                 break;
             }
@@ -208,10 +208,9 @@ void q_reverseK(struct list_head *head, int k)
         if (flag)
             break;
 
-        ptr = tmp;
-        for (int j = 0; j < k; j++) {
-            list_move((*ptr)->next, (*tmp));
-            ptr = &(*ptr)->next;
+        ptr = tmp->next;
+        for (int j = 0; j < k - 1; j++) {
+            list_move(ptr->next, tmp);
         }
         tmp = ptr;
     }
@@ -291,10 +290,11 @@ int q_ascend(struct list_head *head)
             list_del(del);
             q_release_element(list_entry(del, element_t, list));
             count--;
-        } else
+        } else {
+            tmp = cur;
             cur = cur->prev;
+        }
     }
-    // https://leetcode.com/problems/remove-nodes-from-linked-list/
     return count;
 }
 
@@ -317,10 +317,11 @@ int q_descend(struct list_head *head)
             list_del(del);
             q_release_element(list_entry(del, element_t, list));
             count--;
-        } else
+        } else {
+            tmp = cur;
             cur = cur->prev;
+        }
     }
-    // https://leetcode.com/problems/remove-nodes-from-linked-list/
     return count;
 }
 
