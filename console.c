@@ -413,6 +413,11 @@ static bool do_web(int argc, char *argv[])
     return true;
 }
 
+bool do_hello(int argc, char *argv[])
+{
+    return (bool) printf("Hello, World\n");
+}
+
 /* Initialize interpreter */
 void init_cmd()
 {
@@ -421,6 +426,7 @@ void init_cmd()
     err_cnt = 0;
     quit_flag = false;
 
+    ADD_COMMAND(hello, "Print hello message", "");
     ADD_COMMAND(help, "Show summary", "");
     ADD_COMMAND(option,
                 "Display or set options. See 'Options' section for details",
