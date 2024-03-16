@@ -44,6 +44,9 @@ extern int show_entropy;
  */
 #include "queue.h"
 
+#if USE_LINUX_SORT
+#include "list_sort.h"
+#endif
 #include "console.h"
 #include "report.h"
 
@@ -83,6 +86,17 @@ typedef enum {
     POS_TAIL,
     POS_HEAD,
 } position_t;
+
+__attribute__((nonnull(2, 3))) int cmp(void *priv,
+                                       const struct list_head *list1,
+                                       const struct list_head *list2)
+{
+    element_t *list1_entry = list_entry(list1, element_t, list);
+    element_t *list2_entry = list_entry(list2, element_t, list);
+    return strcmp(list1_entry->value, list2_entry->value) < 0 ? 0 : 1;
+}
+
+
 /* Forward declarations */
 static bool q_show(int vlevel);
 
@@ -598,8 +612,13 @@ bool do_sort(int argc, char *argv[])
     error_check();
 
     set_noallocate_mode(true);
-    if (current && exception_setup(true))
+    if (current && exception_setup(true)) {
+#if USE_LINUX_SORT
+        list_sort(NULL, current->q, cmp);
+#else
         q_sort(current->q, descend);
+#endif
+    }
     exception_cancel();
     set_noallocate_mode(false);
 
