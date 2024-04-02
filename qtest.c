@@ -44,7 +44,7 @@ extern int show_entropy;
  */
 #include "queue.h"
 
-#define SELECT_SORT 0
+#define SELECT_SORT 1
 #if (SELECT_SORT == 1)
 #include "list_sort.h"
 #elif (SELECT_SORT == 2)

@@ -59,7 +59,7 @@ check: qtest
 compare: qtest
 	./$< -v 3 -f traces/trace-sort.cmd
 
-measure_sort: measure/measure_sort.c list_sort.c timsort.c merge_sort.c
+measure_sort: measure/measure_sort.c list_sort.c timsort.c
 	$(CC) $^ -o $@ $(CFLAGS)
 
 test: qtest scripts/driver.py
