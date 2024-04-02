@@ -44,8 +44,11 @@ extern int show_entropy;
  */
 #include "queue.h"
 
-#if USE_LINUX_SORT
+#define SELECT_SORT 0
+#if (SELECT_SORT == 1)
 #include "list_sort.h"
+#elif (SELECT_SORT == 2)
+#include "timsort.h"
 #endif
 #include "console.h"
 #include "report.h"
@@ -613,8 +616,10 @@ bool do_sort(int argc, char *argv[])
 
     set_noallocate_mode(true);
     if (current && exception_setup(true)) {
-#if USE_LINUX_SORT
+#if SELECT_SORT == 1
         list_sort(NULL, current->q, cmp);
+#elif SELECT_SORT == 2
+        timsort(NULL, current->q, cmp);
 #else
         q_sort(current->q, descend);
 #endif

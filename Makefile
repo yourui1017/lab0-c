@@ -40,7 +40,7 @@ $(GIT_HOOKS):
 OBJS := qtest.o report.o console.o harness.o queue.o \
         random.o dudect/constant.o dudect/fixture.o dudect/ttest.o \
         shannon_entropy.o \
-        linenoise.o web.o
+        linenoise.o web.o list_sort.o timsort.o
 
 deps := $(OBJS:%.o=.%.o.d)
 
@@ -58,6 +58,9 @@ check: qtest
 
 compare: qtest
 	./$< -v 3 -f traces/trace-sort.cmd
+
+measure_sort: measure/measure_sort.c list_sort.c timsort.c merge_sort.c
+	$(CC) $^ -o $@ $(CFLAGS)
 
 test: qtest scripts/driver.py
 	scripts/driver.py -c
@@ -81,6 +84,7 @@ clean:
 	rm -f $(OBJS) $(deps) *~ qtest /tmp/qtest.*
 	rm -rf .$(DUT_DIR)
 	rm -rf *.dSYM
+	rm -f measure_sort
 	(cd traces; rm -f *~)
 
 distclean: clean
